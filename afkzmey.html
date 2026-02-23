@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFK Arena — Змеиное болото (белая версия)</title>
+    <!-- Favicon: змейка -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90' fill='%23333'%3E🐍%3C/text%3E%3C/svg%3E">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8faf6;  /* очень светлый базовый фон */
+            color: #1e2f23;
+            line-height: 1.5;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* ---------- светлый canvas с тёмными частицами ---------- */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            background: linear-gradient(145deg, #f0f7ea 0%, #e2f0da 100%);
+        }
+
+        .page {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 24px 40px;
+        }
+
+        /* основной контейнер — белый полупрозрачный, но читаемый */
+        .content-glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: 48px 48px 32px 32px;
+            box-shadow: 0 25px 40px -18px rgba(60, 80, 40, 0.3), 0 0 0 1px rgba(100, 130, 90, 0.2) inset;
+            padding: 32px 36px;
+            border: 1px solid rgba(80, 110, 70, 0.2);
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #1f4025;
+            margin-bottom: 0.2em;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        h1 i {
+            background: #dae9d1;
+            color: #2f5e3a;
+            font-size: 2.4rem;
+            padding: 18px;
+            border-radius: 40% 60% 40% 60%;
+            box-shadow: 0 8px 14px rgba(0,0,0,0.05), 0 0 0 2px #b1d2a3 inset;
+        }
+
+        .subhead {
+            font-size: 1.25rem;
+            background: #eaf3e4;
+            color: #1b4627;
+            padding: 14px 28px;
+            border-radius: 60px;
+            margin-bottom: 40px;
+            display: inline-block;
+            font-weight: 500;
+            border-left: 6px solid #5f9e5a;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #1f4025;
+            border-bottom: 3px solid #b7dbaa;
+            padding-bottom: 12px;
+            margin: 50px 0 30px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        h2 i {
+            color: #427a47;
+            font-size: 2.2rem;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #275a30;
+            margin: 24px 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 28px;
+            margin: 16px 0 32px;
+        }
+
+        .card {
+            background: #ffffffd9;
+            backdrop-filter: blur(6px);
+            border-radius: 32px;
+            padding: 28px 26px;
+            box-shadow: 0 15px 30px -10px rgba(70, 100, 70, 0.15), 0 0 0 1px #d2e8ca inset;
+            transition: transform 0.2s ease, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 25px 35px -14px #7d9f76, 0 0 0 2px #b1dfa2 inset;
+            background: #ffffff;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #e2f0da;
+            color: #21582b;
+            font-weight: 600;
+            padding: 8px 22px;
+            border-radius: 40px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+            border: 1px solid #a3cf99;
+        }
+
+        .relic-list, .hero-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 16px;
+        }
+
+        .relic-list li, .hero-list li {
+            background: #eef6e9;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #205128;
+            border-left: 4px solid #80b873;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .hero-category {
+            margin-bottom: 28px;
+        }
+
+        .hero-category p {
+            font-weight: 600;
+            color: #26632e;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            border-left: 5px solid #95cf89;
+            padding-left: 12px;
+        }
+
+        .step-list {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-top: 30px;
+            counter-reset: step-counter;
+        }
+
+        .step-item {
+            background: #ffffffd9;
+            backdrop-filter: blur(4px);
+            border-radius: 40px;
+            padding: 32px 36px;
+            box-shadow: 0 15px 25px -14px #99b392, 0 0 0 1px #cde5c2 inset;
+            position: relative;
+            transition: all 0.2s;
+            counter-increment: step-counter;
+        }
+
+        .step-item:hover {
+            border-color: #b1e0a3;
+            background: #fffffff2;
+            box-shadow: 0 20px 30px -14px #7daf74;
+        }
+
+        .step-item::before {
+            content: counter(step-counter);
+            background: linear-gradient(145deg, #95cf89, #5f9e5a);
+            color: white;
+            font-weight: 700;
+            font-size: 2rem;
+            width: 70px;
+            height: 70px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 40% 20% 50% 30%;
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            box-shadow: 0 6px 0 #3e703f, 0 8px 16px rgba(0,0,0,0.1);
+            border: 3px solid #ebffe3;
+        }
+
+        .step-item h4 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #174121;
+            margin-left: 55px;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed #b1dba4;
+            padding-bottom: 10px;
+        }
+
+        .step-item p {
+            font-size: 1.1rem;
+            color: #1f3926;
+            margin-bottom: 16px;
+        }
+
+        .step-item .note {
+            background: #ecf7e6;
+            padding: 14px 22px;
+            border-radius: 24px;
+            font-size: 1rem;
+            border-left: 6px solid #80b06f;
+            margin-top: 18px;
+        }
+
+        /* --- КРАСИВЫЙ БЛОК ЛОКАЦИЙ (белый стиль) --- */
+        .map-locations {
+            background: #ffffffcc;
+            backdrop-filter: blur(16px);
+            border-radius: 80px;
+            padding: 32px 40px;
+            margin: 50px 0 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            align-items: center;
+            gap: 20px 30px;
+            box-shadow: 0 20px 35px -12px rgba(60, 90, 50, 0.2), 0 0 0 1px #cbe5c0 inset;
+            border: 1px solid #bde0b0;
+        }
+
+        .map-locations span {
+            font-weight: 600;
+            font-size: 1.3rem;
+            background: #f2fdef;
+            padding: 14px 28px;
+            border-radius: 60px;
+            color: #194d23;
+            box-shadow: 0 6px 0 #bed5b2, 0 10px 18px -8px #99bb8f;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #b3dfa3;
+            transition: transform 0.15s;
+        }
+
+        .map-locations span:hover {
+            transform: scale(1.02);
+            background: #eafee0;
+            box-shadow: 0 8px 0 #a8c99c, 0 14px 22px -8px #87a87b;
+        }
+
+        .map-locations i {
+            color: #519c4e;
+            font-size: 1.4rem;
+            filter: drop-shadow(0 2px 2px #ccf0bc);
+        }
+
+        .map-locations i.fa-arrow-right {
+            color: #78b36b;
+            font-size: 1.8rem;
+            opacity: 0.7;
+        }
+
+        hr {
+            border: 1px solid #d4ead0;
+            margin: 30px 0;
+        }
+
+        .footer-note {
+            margin-top: 60px;
+            text-align: center;
+            color: #3e6845;
+            font-size: 1rem;
+            border-top: 2px solid #c5e0ba;
+            padding-top: 24px;
+        }
+
+        @media (max-width: 800px) {
+            .content-glass { padding: 20px; }
+            h1 { font-size: 2.4rem; }
+            .step-item { padding: 25px; }
+            .step-item h4 { margin-left: 40px; font-size: 1.6rem; }
+            .step-item::before { width: 55px; height: 55px; font-size: 1.6rem; }
+            .map-locations span { font-size: 1.1rem; padding: 10px 18px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="particleCanvas"></canvas>
+
+    <div class="page">
+        <div class="content-glass">
+
+            <h1>
+                <i class="fas fa-dragon"></i> 
+                AFK Arena — Змеиное болото
+            </h1>
+            <div class="subhead">
+                <i class="fas fa-skull" style="margin-right: 14px;"></i> 9 глава Вершин Времени • этап 14-4 • награда: Клинок Дарьи
+            </div>
+
+            <!-- введение (светлый стиль) -->
+            <p style="font-size: 1.15rem; background: #ecf7e8; padding: 22px; border-radius: 30px; margin-bottom: 24px; border: 1px solid #c4e2b8;">
+                <i class="fas fa-quote-left" style="color: #569f4e; margin-right: 12px;"></i>
+                Змеиное болото — довольно простое приключение без хитрых головоломок. Главное — использовать героев нужной фракции против боссов и собирать правильные реликвии.  
+                <strong>Совет:</strong> В конце каждого боя переключайтесь на ручное управление, чтобы начинать следующий этап с уже готовой ультой.
+            </p>
+
+            <!-- Реликвии -->
+            <h2><i class="fas fa-hat-wizard"></i> Реликвии</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <span class="badge"><i class="fas fa-star"></i> Основные</span>
+                    <ul class="relic-list">
+                        <li><i class="fas fa-flag"></i> Знамя отваги</li>
+                        <li><i class="fas fa-bolt"></i> Укус смерти (Каз)</li>
+                        <li><i class="fas fa-arrow-right"></i> Серебряная стрела</li>
+                        <li><i class="fas fa-heart"></i> Ядовитое объятие</li>
+                        <li><i class="fas fa-battery-full"></i> Восстановление энергии</li>
+                        <li><i class="fas fa-snowflake"></i> Вестник Льда</li>
+                        <li><i class="fas fa-fire"></i> Вестник Огня</li>
+                        <li><i class="fas fa-moon"></i> Лунный камень</li>
+                        <li><i class="fas fa-sun"></i> Солнечный камень</li>
+                    </ul>
+                    <p style="margin-top: 20px;"><i class="fas fa-shield-alt"></i> <strong>Знамя отваги</strong> даёт мощный бафф к атаке и уменьшение входящего урона.</p>
+                </div>
+                <div class="card">
+                    <span class="badge"><i class="fas fa-crown"></i> Легендарные</span>
+                    <ul class="relic-list">
+                        <li><i class="fas fa-cloud-sun"></i> Раскаты грома</li>
+                        <li><i class="fas fa-skull-crossbones"></i> Смертельное объятие</li>
+                        <li><i class="fas fa-heartbeat"></i> Непокорное сердце</li>
+                        <li><i class="fas fa-hammer"></i> Божественный молот</li>
+                    </ul>
+                    <p style="margin-top: 20px;">Всегда берите минимум <strong>две реликвии восстановления здоровья</strong>. Если их нет — энергию и защиту.</p>
+                </div>
+            </div>
+
+            <!-- Герои -->
+            <h2><i class="fas fa-users"></i> Рекомендуемые герои</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="margin-top:0;"><i class="fas fa-star" style="color: #d4af37;"></i> Топ-3 контролёра</h3>
+                    <ul class="hero-list" style="flex-direction: column; gap: 12px;">
+                        <li><i class="fas fa-bolt"></i> <strong>Тази</strong> — контроль + небольшое лечение</li>
+                        <li><i class="fas fa-tree"></i> <strong>Арден</strong> — контроль, щит от магии</li>
+                        <li><i class="fas fa-fox"></i> <strong>Фокс</strong> — выбрасывает врага, снимает щиты (Грежул, Брутус, Люций) и бафф Белинды</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="hero-category">
+                        <p><i class="fas fa-shield-virus"></i> Танки / лекари</p>
+                        <ul class="hero-list">
+                            <li>Немора</li><li>Люций</li><li>Рован</li><li>Хендрик</li><li>Нумису</li><li>Брутус</li><li>Ульмус</li><li>Грежун</li><li>Торан</li>
+                        </ul>
+                    </div>
+                    <div class="hero-category">
+                        <p><i class="fas fa-swords"></i> Атакующие</p>
+                        <ul class="hero-list">
+                            <li>Варек</li><li>Шемира</li><li>Баден</li><li>Белинда</li><li>Антандра</li><li>Тэйн</li><li>Сатрана</li><li>Эйрон</li><li>Каз</li>
+                        </ul>
+                    </div>
+                    <div class="hero-category">
+                        <p><i class="fas fa-chart-line"></i> Усилители урона</p>
+                        <ul class="hero-list">
+                            <li>Розалина</li><li>Райна</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Прохождение по шагам -->
+            <h2><i class="fas fa-map-signs"></i> Полное прохождение</h2>
+            <div class="step-list">
+                <div class="step-item"><h4>Начало и Знамя отваги</h4><p>Поговорите с <strong>Хоганом</strong> — он даст <strong>Знамя отваги</strong>. После каждого боя переключайтесь на ручной режим.</p></div>
+                <div class="step-item"><h4>Первые два лагеря</h4><p>Атакуйте любой из двух лагерей. После первого заберите реликвию и той же командой бейте второй. Берите реликвии урона и восстановления здоровья.</p></div>
+                <div class="step-item"><h4>Маленький лагерь справа</h4><p>Прокрутите экран вправо — уничтожьте маленький лагерь (можно Громилом или обычной командой).</p></div>
+                <div class="step-item"><h4>Лагеря Носителей света — нужна Шемира</h4><p><span class="badge">Важно!</span> Возьмите в команду <strong>Шемиру</strong>. В первом лагере Носителей нет реликвий и высокие уровни — нужно три Могилорождённых или Шемира.</p></div>
+                <div class="step-item"><h4>Выбор лагеря и найм дикаря</h4><p>Два лагеря Носителей: один сложный дуэль, другой с одним Дикарём. Атакуйте слабый и наймите Дикаря (Тази/Лика или Каз).</p></div>
+                <div class="step-item"><h4>Два соседних лагеря Носителей</h4><p>Уничтожьте оба. Реликвия в маленьком лагере возле Храма Жизни.</p></div>
+                <div class="step-item"><h4>Прощальный дуэт Носителей</h4><p>Сразитесь с финальным дуэтом, заберите реликвию.</p></div>
+                <div class="step-item"><h4>Лагерь Могилорожденных</h4><p>Идите в лагерь Могилорожденных, используйте трио Дикарей + Шемиру. Реликвий там нет.</p></div>
+                <div class="step-item"><h4>Два лагеря + Люций / Белинда</h4><p>Атакуйте два лагеря (скриншот), заберите реликвии и наймите <strong>Люция</strong> или <strong>Белинду</strong>.</p><div class="note"><i class="fas fa-search"></i> Найдите Люция или Белинду — они пригодятся для финала.</div></div>
+                <div class="step-item"><h4>Финал: лагеря Громил</h4><p>Уничтожайте все лагеря Громил с нанятыми Носителями Света. Люция и Белинды достаточно.</p></div>
+            </div>
+
+            <!-- КРАСИВЫЙ БЛОК ЛОКАЦИЙ (обновлённый, светлый, стильный) -->
+            <div class="map-locations">
+                <span><i class="fas fa-map-pin"></i> Старт</span>
+                <i class="fas fa-arrow-right"></i>
+                <span><i class="fas fa-water"></i> Змеиное болото</span>
+                <i class="fas fa-arrow-right"></i>
+                <span><i class="fas fa-moon"></i> Затменная дуга луны</span>
+                <i class="fas fa-arrow-right"></i>
+                <span><i class="fas fa-globe"></i> Дикие земли</span>
+                <i class="fas fa-arrow-right"></i>
+                <span><i class="fas fa-mountain"></i> Мифическая гора</span>
+            </div>
+
+            <!-- дополнительные плашки (светлые) -->
+            <hr>
+            <div style="display: flex; flex-wrap: wrap; gap: 24px; background: #ecf5e7; border-radius: 40px; padding: 28px; margin-top: 20px;">
+                <div style="flex:1 1 200px;"><i class="fas fa-dice-d6" style="font-size:2.5rem; color:#4e874a;"></i><p><strong>Реликвии:</strong> «Укус смерти» для Каз, «Ядовитое объятие», Вестники.</p></div>
+                <div style="flex:1 1 200px;"><i class="fas fa-shield" style="font-size:2.5rem; color:#4e874a;"></i><p><strong>Боссы:</strong> нет иммунитета к контролю — Тази, Арден, Фокс в деле.</p></div>
+                <div style="flex:1 1 200px;"><i class="fas fa-rotate-left" style="font-size:2.5rem; color:#4e874a;"></i><p><strong>Важно:</strong> в лагере без реликвий нужны три Могилорождённых или Шемира.</p></div>
+            </div>
+
+            <!-- футер -->
+            <div class="footer-note">
+                <i class="fas fa-crown" style="color: #c9a234;"></i> Продавец: <strong>ShizzyBoost</strong> обновлен 23.02.2026 г.<br>
+                <span style="opacity:0.7;">НА ТОВАРЕ АВТОРСКИЕ ПРАВА · ПЕРЕПРОДАЖА ЗАПРЕЩЕНА</span>
+            </div>
+        </div> <!-- .content-glass -->
+    </div> <!-- .page -->
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+
+            function initParticles(count = 120) {
+                particles = [];
+                for (let i = 0; i < count; i++) {
+                    particles.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        radius: Math.random() * 4 + 1.5,
+                        speedX: (Math.random() - 0.5) * 0.3,
+                        speedY: (Math.random() - 0.5) * 0.15,
+                        color: `rgba(70, 100, 60, ${Math.random() * 0.4 + 0.2})`,  // тёмно-зелёные, полупрозрачные
+                        glow: Math.random() * 0.5 + 0.3
+                    });
+                }
+            }
+
+            function resizeCanvas() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+                initParticles(160);
+            }
+
+            function animateParticles() {
+                if (!ctx) return;
+                ctx.clearRect(0, 0, width, height);
+
+                // очень светлый градиент фона (уже задан в CSS, но можем слегка перекрыть)
+                // для уверенности зальём полупрозрачным, чтобы частицы выделялись
+                ctx.fillStyle = '#f5fbf0';
+                ctx.fillRect(0, 0, width, height);
+
+                for (let p of particles) {
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+
+                    if (p.x < 0) p.x = width;
+                    if (p.x > width) p.x = 0;
+                    if (p.y < 0) p.y = height;
+                    if (p.y > height) p.y = 0;
+
+                    ctx.shadowColor = '#314f2e';
+                    ctx.shadowBlur = 10 * p.glow;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+
+                    ctx.shadowBlur = 14;
+                    ctx.beginPath();
+                    ctx.arc(p.x-0.5, p.y-0.5, p.radius * 0.5, 0, Math.PI*2);
+                    ctx.fillStyle = '#446b40';
+                    ctx.fill();
+                }
+
+                ctx.shadowBlur = 0;
+                requestAnimationFrame(animateParticles);
+            }
+
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+            });
+
+            resizeCanvas();
+            animateParticles();
+        })();
+    </script>
+</body>
+</html>
