@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFK ARENA · Неукротимое пламя by ShizzyBoost</title>
+    <!-- Favicon (минималистичный огонь) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%23ff7b00'>🔥</text></svg>">
+    <!-- Google Fonts (чистый гротеск) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <style>
+        /* базовый сброс */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #0f0f12;
+            color: #ddd;
+            line-height: 1.5;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* частицы — едва заметный фон */
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.45;
+            pointer-events: none;
+        }
+
+        /* основной контент */
+        .content {
+            position: relative;
+            z-index: 2;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* простая белая карточка без излишеств */
+        .guide-card {
+            background-color: rgba(18, 20, 26, 0.9);
+            border: 1px solid #33363f;
+            padding: 2.5rem 2rem;
+            border-radius: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 7vw, 3.8rem);
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            color: #fff;
+            margin-bottom: 0.2rem;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .accent {
+            color: #ff9940;
+            font-weight: 400;
+        }
+
+        .subhead {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #aaa;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid #2b2e36;
+            padding-bottom: 1.2rem;
+        }
+
+        .subhead strong {
+            color: #ffb05c;
+            font-weight: 500;
+        }
+
+        /* три колонки советов */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.8rem;
+            margin: 2rem 0 2.5rem;
+        }
+
+        .tip-item {
+            background: transparent;
+            border: 1px solid #2f323c;
+            border-radius: 18px;
+            padding: 1.6rem 1.4rem;
+            transition: border-color 0.2s;
+        }
+
+        .tip-item:hover {
+            border-color: #ff9940;
+        }
+
+        .tip-number {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: #ff9940;
+            margin-bottom: 0.75rem;
+            display: inline-block;
+            border-left: 3px solid #ff9940;
+            padding-left: 0.75rem;
+        }
+
+        .tip-item p {
+            font-size: 0.98rem;
+            color: #ccc;
+        }
+
+        .tip-item strong, .tip-item b {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .highlight {
+            color: #ffb77c;
+            background: none;
+            font-weight: 400;
+        }
+
+        /* контактная строка — просто и ясно */
+        .contact-line {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1.5rem 1rem;
+            border-top: 1px solid #2b2e36;
+            font-size: 1.15rem;
+        }
+
+        .contact-line a {
+            color: #ff9940;
+            text-decoration: none;
+            border-bottom: 1px dotted #ff9940;
+            margin: 0 0.3rem;
+            font-weight: 500;
+        }
+
+        .contact-line a:hover {
+            border-bottom: 1px solid #ffb567;
+        }
+
+        .funpay-nick {
+            color: #f0a550;
+            background: #20232b;
+            padding: 0.2rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            margin-left: 0.5rem;
+            border: 1px solid #3e404b;
+            display: inline-block;
+        }
+
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding-top: 2rem;
+            font-size: 0.85rem;
+            color: #5f626d;
+            letter-spacing: 0.2px;
+        }
+
+        @media (max-width: 900px) {
+            .tips-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .guide-card {
+                padding: 1.8rem 1.2rem;
+            }
+            .tips-grid {
+                grid-template-columns: 1fr;
+            }
+            .contact-line {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="particles-js"></div>
+
+    <div class="content">
+        <div class="guide-card">
+            <h1>НЕУКРОТИМОЕ ПЛАМЯ <span class="accent">·</span></h1>
+            <div class="subhead">гайд для AFK ARENA от <strong>ShizzyBoost</strong></div>
+
+            <div class="tips-grid">
+                <!-- совет 1 -->
+                <div class="tip-item">
+                    <div class="tip-number">совет №1</div>
+                    <p><strong>Герои с контролем</strong> — ваша основа. Если не достались легендарные, используйте <span class="highlight">Ордена</span>. Он доступен всем и пригодится в «Тайнах леса».</p>
+                </div>
+                <!-- совет 2 -->
+                <div class="tip-item">
+                    <div class="tip-number">совет №2</div>
+                    <p><strong>Мощный ДД</strong> — Шамира, Савенас, Брутус, Белинда… Поднимите уровень основного дамагера по максимуму.</p>
+                </div>
+                <!-- совет 3 -->
+                <div class="tip-item">
+                    <div class="tip-number">совет №3</div>
+                    <p><strong>Хил и реликвии</strong>: Ветвь Иггдрасиля, Рог восполнения, Кровожадный захват, Лунный + Солнечный камни.</p>
+                </div>
+            </div>
+
+            <div class="contact-line">
+                <span>💬 остались вопросы?</span>
+                <a href="https://funpay.com/chat/?referrer=ShizzyBoost" target="_blank">чат на FunPay</a>
+                <span class="funpay-nick">ShizzyBoost</span>
+            </div>
+
+            <footer>
+                by ShizzyBoost · НА ТОВАРЕ АВТОРСКИЕ ПРАВА · ПЕРЕПРОДАЖА ЗАПРЕЩЕНА
+            </footer>
+        </div>
+    </div>
+
+    <!-- настройка частиц: монохромные, мало линий, приглушённые -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            particlesJS('particles-js', {
+                particles: {
+                    number: { value: 70, density: { enable: true, value_area: 1000 } },
+                    color: { value: '#ffa74d' },
+                    shape: { type: 'circle' },
+                    opacity: { value: 0.25, random: true, anim: { enable: true, speed: 0.8, opacity_min: 0.1 } },
+                    size: { value: 2.5, random: true },
+                    line_linked: {
+                        enable: true,
+                        distance: 160,
+                        color: '#ffb05c',
+                        opacity: 0.12,
+                        width: 0.8
+                    },
+                    move: {
+                        enable: true,
+                        speed: 0.9,
+                        direction: 'none',
+                        random: true,
+                        straight: false,
+                        out_mode: 'out'
+                    }
+                },
+                interactivity: {
+                    detect_on: 'canvas',
+                    events: {
+                        onhover: { enable: true, mode: 'grab' },
+                        onclick: { enable: true, mode: 'push' }
+                    },
+                    modes: {
+                        grab: { distance: 200, line_linked: { opacity: 0.3 } },
+                        push: { particles_nb: 2 }
+                    }
+                },
+                retina_detect: true
+            });
+        });
+    </script>
+
+    <!-- маленькая корректировка, чтобы канвас не перехватывал клики -->
+    <style>
+        #particles-js canvas {
+            display: block;
+            pointer-events: none;
+        }
+        body {
+            pointer-events: none;
+        }
+        body * {
+            pointer-events: auto;
+        }
+    </style>
+</body>
+</html>
